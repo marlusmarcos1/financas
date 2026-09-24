@@ -6,7 +6,9 @@ import { AuthProvider } from "@/features/auth/AuthProvider";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { CardsPage } from "@/features/cards/CardsPage";
 import { CategoriesPage } from "@/features/categories/CategoriesPage";
+import { CommitmentsPage } from "@/features/commitments/CommitmentsPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
+import { InstallmentsPage } from "@/features/installments/InstallmentsPage";
 import { RecurringPage } from "@/features/recurring/RecurringPage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
 import { TransactionsPage } from "@/features/transactions/TransactionsPage";
@@ -28,6 +30,8 @@ export function App() {
           <Route path="/contas" element={<AccountsPage />} />
           <Route path="/cartoes" element={<CardsPage />} />
           <Route path="/categorias" element={<CategoriesPage />} />
+          <Route path="/parcelamentos" element={<InstallmentsPage />} />
+          <Route path="/compromissos" element={<CommitmentsPage />} />
           <Route path="/recorrencias" element={<RecurringPage />} />
           <Route path="/configuracoes" element={<SettingsPage />} />
         </Route>

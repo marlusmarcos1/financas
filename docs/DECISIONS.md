@@ -70,9 +70,44 @@ criar/editar uma recorrência ativa (o usuário já vê os lançamentos na hora)
 vias. A checagem de duplicidade é por `(recurring_rule_id, date)`, então rodar o job com
 mais frequência que o necessário é inofensivo (idempotente).
 
+### `server.servlet.encoding.force=true` explícito
+Sem isso, o `Content-Type` das respostas JSON não declara `charset`, e o
+`MockHttpServletResponse.getContentAsString()` (sem argumento) usado nos testes de
+integração cai para ISO-8859-1 por padrão do Servlet, corrompendo acentos só na leitura do
+corpo da resposta nos testes (a aplicação real e o browser sempre tratam JSON como UTF-8,
+então não havia bug em produção — só nos testes). Forçar UTF-8 na resposta evita ter que
+lembrar de `getContentAsString(StandardCharsets.UTF_8)` em cada teste.
+
 ### `TransactionKind.TRANSFER` implementado de forma mínima
 A especificação lista `TRANSFER` como um dos tipos de lançamento mas não detalha suas regras
 de negócio (ex.: conta de origem/destino) em nenhuma seção posterior. Tratamos por ora como
 uma variação de lançamento de conta única (mesma exigência de `account_id` que `INCOME`),
 sem inventar um modelo de duas pontas que a spec não pediu. Registrar aqui para revisitar
 se alguma fase futura detalhar transferências entre contas.
+
+## Fase 4
+
+### Arredondamento: `HALF_EVEN`
+A seção 3 pede para documentar a escolha entre `HALF_EVEN`/`HALF_UP`. Usamos `HALF_EVEN`
+("banker's rounding") em todas as divisões monetárias (parcela sem juros, Tabela Price):
+é o padrão do `BigDecimal.ROUND_HALF_EVEN`/`RoundingMode.HALF_EVEN`, reduz viés sistemático
+de arredondamento em séries longas de cálculos (relevante para 12–24 parcelas) e é o
+comportamento usado por sistemas financeiros como o padrão IEEE 754.
+
+### Parcela sem juros: ajuste de centavos só na última; com juros (Tabela Price): parcelas iguais
+A seção 7.2 pede ajuste de centavos na última parcela para o caso simples (total/n). Para
+parcelamento com juros, a Tabela Price já produz parcelas matematicamente iguais por
+construção (esse é o objetivo do sistema de amortização francês) — não há "total informado
+pelo usuário" para reconciliar contra a soma das parcelas, então não aplicamos nenhum ajuste
+adicional na última parcela nesse caso.
+
+### `installment_plan.installment_amount` guarda um valor representativo, não uma lista
+O campo é singular (`NUMERIC`), como no modelo de dados da seção 6. Quando há ajuste de
+centavos (parcela sem juros com divisão não exata), ele guarda a parcela "base" (todas menos
+a última); o valor exato de cada parcela fica nas `transaction`s geradas, não duplicado aqui.
+
+### "Compromissos futuros": leitura direta das `transaction`s já materializadas
+Em vez de recalcular parcelas/recorrências sob demanda, o endpoint `/api/v1/commitments` soma
+as `transaction`s que já têm `installment_plan_id` ou `recurring_rule_id` preenchido, agrupadas
+por mês. Isso reaproveita a materialização das Fases 3/4 (nenhuma lógica de projeção
+duplicada) e garante que a tela sempre reflita exatamente o que está lançado.

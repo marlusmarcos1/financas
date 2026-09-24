@@ -62,3 +62,12 @@ account_id/card_id (nunca os dois — `CHECK`), invoice_id (preenchido automatic
 `card_id` está presente), status (`PLANNED`\|`PAID`), installment_plan_id/installment_number/
 income_entry_id (colunas já existem, sem FK ainda — tabelas chegam nas fases 4 e 5),
 recurring_rule_id (preenchido quando o lançamento vem de uma recorrência), notes.
+
+## Fase 4
+
+### `installment_plan`
+card_id, description, purchase_date, total_amount, installment_count, installment_amount
+(valor "representativo" — base sem juros, ou parcela fixa da Tabela Price com juros),
+first_installment_number (1 para plano novo; >1 para "já em andamento"), first_invoice_month
+(`AAAA-MM`), interest_rate_monthly (opcional), category_id. `transaction.installment_plan_id`
+ganha FK de verdade nesta fase (a tabela já existia como coluna solta desde a Fase 3).

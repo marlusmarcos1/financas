@@ -59,6 +59,16 @@ public class InvoiceService {
                         cycle.dueDate())));
     }
 
+    /**
+     * Encontra/cria a fatura de um cartão para uma competência específica (usado ao gerar as
+     * parcelas restantes de um parcelamento, onde já sabemos o mês-alvo de cada uma).
+     */
+    public Invoice findOrCreateInvoiceForMonth(CreditCard card, YearMonth referenceMonth) {
+        LocalDate closingDateOfThatMonth =
+                referenceMonth.atDay(Math.min(card.getClosingDay(), referenceMonth.lengthOfMonth()));
+        return findOrCreateInvoiceFor(card, closingDateOfThatMonth);
+    }
+
     @Transactional(readOnly = true)
     public List<Invoice> findAllByCard(UUID cardId) {
         return invoiceRepository.findAllByUserIdAndCardIdOrderByReferenceMonthAsc(

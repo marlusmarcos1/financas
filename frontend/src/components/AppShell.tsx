@@ -7,6 +7,8 @@ const navItems = [
   { to: "/contas", label: "Contas" },
   { to: "/cartoes", label: "Cartões" },
   { to: "/categorias", label: "Categorias" },
+  { to: "/parcelamentos", label: "Parcelamentos" },
+  { to: "/compromissos", label: "Compromissos futuros" },
   { to: "/recorrencias", label: "Recorrências" },
   { to: "/configuracoes", label: "Configurações" },
 ];

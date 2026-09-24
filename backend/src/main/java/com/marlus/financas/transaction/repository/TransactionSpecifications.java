@@ -43,4 +43,10 @@ public final class TransactionSpecifications {
     public static Specification<Transaction> kind(TransactionKind kind) {
         return (root, query, cb) -> kind == null ? null : cb.equal(root.get("kind"), kind);
     }
+
+    /** Lançamentos originados de um parcelamento ou de uma recorrência (comprometimentos futuros). */
+    public static Specification<Transaction> committed() {
+        return (root, query, cb) ->
+                cb.or(cb.isNotNull(root.get("installmentPlanId")), cb.isNotNull(root.get("recurringRuleId")));
+    }
 }
