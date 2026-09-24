@@ -16,3 +16,30 @@ implementado.
 | birth_date | DATE | nullable |
 | created_at | TIMESTAMPTZ, NOT NULL | preenchido por auditoria JPA |
 | updated_at | TIMESTAMPTZ, NOT NULL | preenchido por auditoria JPA |
+
+## Fase 2
+
+Todas as tabelas abaixo têm `user_id` (FK `app_user`), `created_at` e `updated_at`.
+
+### `account`
+name, type (`CHECKING`\|`SAVINGS_BOX`\|`BROKERAGE`\|`CASH`), institution, initial_balance
+`NUMERIC(14,2)`, purpose (`DAILY`\|`EMERGENCY_RESERVE`\|`GOAL`\|`INVESTMENT`), archived.
+
+### `credit_card`
+name, issuer, credit_limit `NUMERIC(14,2)`, closing_day/due_day (`SMALLINT`, 1–31),
+default_payment_account_id (FK `account`, opcional), color, archived.
+
+### `category`
+name, kind (`INCOME`\|`EXPENSE`), nature (`FIXED`\|`VARIABLE`), parent_id (FK `category`,
+opcional — precisa ter o mesmo `kind` do filho), icon, color. Sem soft delete: exclusão é
+física e bloqueada se existirem subcategorias ou orçamentos vinculados.
+
+### `budget`
+category_id (FK `category`), month (`VARCHAR(7)`, formato `AAAA-MM`; `NULL` = teto padrão da
+categoria), limit_amount `NUMERIC(14,2)`. Índices únicos parciais garantem no máximo um teto
+padrão e um teto por mês por categoria.
+
+### `app_setting`
+key/value por usuário (`UNIQUE(user_id, key)`). Chaves conhecidas: `tithe_percent` (10),
+`installment_limit_percent` (30), `emergency_months_target` (6), `currency` (BRL) — valores
+ausentes assumem esses padrões (não são gravados até o usuário salvar as configurações).

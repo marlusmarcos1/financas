@@ -1,9 +1,13 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { RequireAuth } from "@/components/RequireAuth";
+import { AccountsPage } from "@/features/accounts/AccountsPage";
 import { AuthProvider } from "@/features/auth/AuthProvider";
 import { LoginPage } from "@/features/auth/LoginPage";
+import { CardsPage } from "@/features/cards/CardsPage";
+import { CategoriesPage } from "@/features/categories/CategoriesPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
+import { SettingsPage } from "@/features/settings/SettingsPage";
 
 export function App() {
   return (
@@ -18,6 +22,10 @@ export function App() {
           }
         >
           <Route path="/" element={<DashboardPage />} />
+          <Route path="/contas" element={<AccountsPage />} />
+          <Route path="/cartoes" element={<CardsPage />} />
+          <Route path="/categorias" element={<CategoriesPage />} />
+          <Route path="/configuracoes" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

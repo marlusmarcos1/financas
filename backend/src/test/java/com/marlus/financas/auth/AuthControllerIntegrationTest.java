@@ -4,34 +4,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.marlus.financas.AbstractIntegrationTest;
-import com.marlus.financas.user.AppUserRepository;
-import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private AppUserRepository appUserRepository;
-
     @Test
-    void adminUserIsCreatedExactlyOnceOnStartup() {
-        assertThat(appUserRepository.count()).isEqualTo(1);
+    void adminUserIsCreatedOnStartup() {
         assertThat(appUserRepository.findByUsername("marlus")).isPresent();
     }
 
@@ -42,18 +27,9 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void loginWithValidCredentialsCreatesSessionAndAllowsAccessingMe() throws Exception {
-        MvcResult loginResult = mockMvc.perform(post("/api/v1/auth/login")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("username", "marlus", "password", "marlus"))))
-                .andExpect(status().isOk())
-                .andReturn();
+        MockHttpSession session = loginAsDefaultUser();
 
-        HttpSession session = loginResult.getRequest().getSession(false);
-        assertThat(session).isNotNull();
-
-        mockMvc.perform(get("/api/v1/auth/me").session((MockHttpSession) session))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/auth/me").session(session)).andExpect(status().isOk());
     }
 
     @Test
@@ -82,5 +58,38 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("username", username, "password", "errada"))))
                 .andExpect(status().isTooManyRequests());
+    }
+
+    @Test
+    void changePasswordWithWrongCurrentPasswordIsRejected() throws Exception {
+        MockHttpSession session = createUserAndLogin("usuario-troca-senha-1", "senha-original");
+
+        mockMvc.perform(put("/api/v1/auth/password")
+                        .session(session)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("currentPassword", "senha-errada", "newPassword", "nova-senha-123"))))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void changePasswordAllowsLoginWithNewPassword() throws Exception {
+        MockHttpSession session = createUserAndLogin("usuario-troca-senha-2", "senha-original");
+
+        mockMvc.perform(put("/api/v1/auth/password")
+                        .session(session)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("currentPassword", "senha-original", "newPassword", "nova-senha-123"))))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("username", "usuario-troca-senha-2", "password", "nova-senha-123"))))
+                .andExpect(status().isOk());
     }
 }

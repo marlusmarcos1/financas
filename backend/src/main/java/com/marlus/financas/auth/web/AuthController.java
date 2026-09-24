@@ -2,6 +2,7 @@ package com.marlus.financas.auth.web;
 
 import com.marlus.financas.auth.service.AppUserDetails;
 import com.marlus.financas.auth.service.LoginAttemptService;
+import com.marlus.financas.auth.service.PasswordChangeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -31,10 +33,15 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final LoginAttemptService loginAttemptService;
+    private final PasswordChangeService passwordChangeService;
 
-    public AuthController(AuthenticationManager authenticationManager, LoginAttemptService loginAttemptService) {
+    public AuthController(
+            AuthenticationManager authenticationManager,
+            LoginAttemptService loginAttemptService,
+            PasswordChangeService passwordChangeService) {
         this.authenticationManager = authenticationManager;
         this.loginAttemptService = loginAttemptService;
+        this.passwordChangeService = passwordChangeService;
     }
 
     @GetMapping("/csrf")
@@ -78,6 +85,12 @@ public class AuthController {
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         new SecurityContextLogoutHandler()
                 .logout(request, response, SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @PutMapping("/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(@Valid @RequestBody PasswordChangeRequest request) {
+        passwordChangeService.changePassword(request.currentPassword(), request.newPassword());
     }
 
     @GetMapping("/me")
