@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/${POSTGRES_DB:financas}
+    username: ${POSTGRES_USER:financas}
+    password: ${POSTGRES_PASSWORD:financas}

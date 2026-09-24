@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: financas
+  jackson:
+    time-zone: America/Fortaleza
+    default-property-inclusion: non_null
+  datasource:
+    url: jdbc:postgresql://localhost:5432/financas
+    username: financas
+    password: financas
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: America/Fortaleza
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  cache:
+    type: caffeine
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+app:
+  admin:
+    username: ${APP_ADMIN_USER:marlus}
+    password: ${APP_ADMIN_PASSWORD:marlus}
+  security:
+    login-max-attempts: 5
+    login-lockout-minutes: 5
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    com.marlus.financas: INFO
