@@ -9,6 +9,8 @@ const navItems = [
   { to: "/categorias", label: "Categorias" },
   { to: "/parcelamentos", label: "Parcelamentos" },
   { to: "/compromissos", label: "Compromissos futuros" },
+  { to: "/receitas", label: "Receitas e Extras" },
+  { to: "/dizimo", label: "Dízimo" },
   { to: "/recorrencias", label: "Recorrências" },
   { to: "/configuracoes", label: "Configurações" },
 ];

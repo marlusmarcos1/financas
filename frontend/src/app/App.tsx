@@ -8,9 +8,11 @@ import { CardsPage } from "@/features/cards/CardsPage";
 import { CategoriesPage } from "@/features/categories/CategoriesPage";
 import { CommitmentsPage } from "@/features/commitments/CommitmentsPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
+import { IncomePage } from "@/features/income/IncomePage";
 import { InstallmentsPage } from "@/features/installments/InstallmentsPage";
 import { RecurringPage } from "@/features/recurring/RecurringPage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
+import { TithePage } from "@/features/tithe/TithePage";
 import { TransactionsPage } from "@/features/transactions/TransactionsPage";
 
 export function App() {
@@ -32,6 +34,8 @@ export function App() {
           <Route path="/categorias" element={<CategoriesPage />} />
           <Route path="/parcelamentos" element={<InstallmentsPage />} />
           <Route path="/compromissos" element={<CommitmentsPage />} />
+          <Route path="/receitas" element={<IncomePage />} />
+          <Route path="/dizimo" element={<TithePage />} />
           <Route path="/recorrencias" element={<RecurringPage />} />
           <Route path="/configuracoes" element={<SettingsPage />} />
         </Route>

@@ -65,6 +65,24 @@ recurring_rule_id (preenchido quando o lançamento vem de uma recorrência), not
 
 ## Fase 4
 
+## Fase 5
+
+### `income_source`
+name, type (`SALARY`\|`SCHOLARSHIP`\|`THIRTEENTH`\|`EXTRA`\|`OTHER`), recurrence
+(`MONTHLY`\|`TEMPORARY`\|`SPORADIC`), expected_amount, pay_day, start_date/end_date,
+expected_months, tithe_applies, counts_in_base_budget. Regra: bolsa/13º/extras têm
+`counts_in_base_budget=false` (ficam fora da renda base) e normalmente `tithe_applies=true`.
+
+### `income_entry`
+source_id, account_id (opcional), reference_month, received_on, amount, status
+(`EXPECTED`\|`RECEIVED`).
+
+### `tithe_ledger`
+Uma linha por `(user_id, reference_month)` (`UNIQUE`), recalculada automaticamente sempre que
+um `income_entry` **recebido** de uma fonte com `tithe_applies=true` muda: base_amount = soma
+dessas receitas no mês, due_amount = base × percentual configurado (padrão 10%), paid_amount/
+paid_on/status conforme os pagamentos registrados.
+
 ### `installment_plan`
 card_id, description, purchase_date, total_amount, installment_count, installment_amount
 (valor "representativo" — base sem juros, ou parcela fixa da Tabela Price com juros),

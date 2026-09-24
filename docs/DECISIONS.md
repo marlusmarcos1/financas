@@ -111,3 +111,23 @@ Em vez de recalcular parcelas/recorrências sob demanda, o endpoint `/api/v1/com
 as `transaction`s que já têm `installment_plan_id` ou `recurring_rule_id` preenchido, agrupadas
 por mês. Isso reaproveita a materialização das Fases 3/4 (nenhuma lógica de projeção
 duplicada) e garante que a tela sempre reflita exatamente o que está lançado.
+
+## Fase 5
+
+### Dízimo calculado sobre receitas **recebidas**, não esperadas
+A base do `tithe_ledger` soma apenas `income_entry` com `status=RECEIVED`. Cobrar dízimo
+sobre receita ainda não recebida (`EXPECTED`) anteciparia uma obrigação sobre dinheiro que
+ainda não entrou — contraria a lógica de "dízimo sobre tudo que entra" da seção 1/7.5.
+
+### "Sobra normalizada" (seção 7.3) adiada
+A spec pede, além da "sobra do mês", uma versão normalizada "sem itens fora do padrão". Como
+"fora do padrão" não é definido precisamente e depende de médias históricas mais robustas
+(gastos variáveis dos últimos 3–6 meses), implementamos por ora só a sobra simples (renda
+base recebida − despesas do mês − dízimo pendente) e deixamos a versão normalizada para a
+Fase 9 (Acabamento), quando também entram os alertas do dashboard.
+
+### `allocation_rule` não implementada nesta fase
+A seção 6 lista `allocation_rule` na "Destinação do dinheiro", mas o plano de fases (seção 15)
+não a exige na Fase 5 — o critério de aceite é só "bolsa e 13º fora da renda base; dízimo de
+10% sobre tudo", que não depende dela. Fica para a Fase 7, quando aposentadoria/metas
+realmente consomem uma regra de destinação percentual.
