@@ -7,6 +7,7 @@ import { FormField, inputClass } from "@/components/FormField";
 import { Modal } from "@/components/Modal";
 import { useToast } from "@/components/ToastProvider";
 import { fetchAccounts } from "@/features/accounts/api";
+import { InvoicesModal } from "@/features/invoices/InvoicesModal";
 import { ApiError } from "@/lib/api";
 import {
   archiveCreditCard,
@@ -35,6 +36,7 @@ export function CardsPage() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [editingCard, setEditingCard] = useState<CreditCard | null>(null);
+  const [invoicesCard, setInvoicesCard] = useState<CreditCard | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   const cardsQuery = useQuery({ queryKey: ["credit-cards"], queryFn: fetchCreditCards });
@@ -138,6 +140,13 @@ export function CardsPage() {
                       <div className="flex justify-end gap-2">
                         <button
                           type="button"
+                          onClick={() => setInvoicesCard(card)}
+                          className="text-slate-600 hover:underline dark:text-slate-300"
+                        >
+                          Faturas
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => setEditingCard(card)}
                           className="text-slate-600 hover:underline dark:text-slate-300"
                         >
@@ -188,6 +197,15 @@ export function CardsPage() {
           accounts={accountsQuery.data ?? []}
           onClose={() => setEditingCard(null)}
           onSubmit={(data) => updateMutation.mutate({ id: editingCard.id, data })}
+        />
+      )}
+
+      {invoicesCard && (
+        <InvoicesModal
+          cardId={invoicesCard.id}
+          cardName={invoicesCard.name}
+          accounts={accountsQuery.data ?? []}
+          onClose={() => setInvoicesCard(null)}
         />
       )}
     </div>

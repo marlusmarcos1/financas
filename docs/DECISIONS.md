@@ -50,3 +50,29 @@ A seção 8 não lista uma tela dedicada a contas (apenas "Cartões e faturas" e
 "Configurações"). Como cartões, e futuramente faturas/lançamentos, referenciam contas,
 criamos uma tela "Contas" simples na navegação — sem ela não haveria como cadastrar a
 conta de pagamento padrão de um cartão pela interface.
+
+## Fase 3
+
+### Pagamento de fatura não gera uma `transaction` própria
+A seção 7.1 diz que "pagar fatura" cria uma transação de saída na conta escolhida. Optamos
+por registrar o pagamento apenas nos campos `paid_amount`/`paid_on`/`paid_from_account_id`
+da própria `invoice`, sem duplicar como uma `transaction` de saída da conta: as
+`transaction`s individuais da fatura (kind `EXPENSE`, `card_id` preenchido) já representam
+o gasto; criar mais uma `transaction` de saída da conta ao pagar somaria o valor duas vezes
+no fluxo de caixa. Se a Fase 5/6 (orçamento, sobra do mês) precisar enxergar o pagamento
+como saída de conta, revisamos isso então — por ora é mais simples e evita dupla contagem.
+
+### Materialização de recorrências: imediata na criação/edição + job diário
+A seção 6 pede que um "job/serviço" materialize as ocorrências dos próximos 12 meses e ao
+abrir cada mês. Implementamos os dois: a materialização roda de forma síncrona ao
+criar/editar uma recorrência ativa (o usuário já vê os lançamentos na hora) e também via
+`@Scheduled` diário (3h da manhã), que cobre a abertura do mês e cartões criados por outras
+vias. A checagem de duplicidade é por `(recurring_rule_id, date)`, então rodar o job com
+mais frequência que o necessário é inofensivo (idempotente).
+
+### `TransactionKind.TRANSFER` implementado de forma mínima
+A especificação lista `TRANSFER` como um dos tipos de lançamento mas não detalha suas regras
+de negócio (ex.: conta de origem/destino) em nenhuma seção posterior. Tratamos por ora como
+uma variação de lançamento de conta única (mesma exigência de `account_id` que `INCOME`),
+sem inventar um modelo de duas pontas que a spec não pediu. Registrar aqui para revisitar
+se alguma fase futura detalhar transferências entre contas.

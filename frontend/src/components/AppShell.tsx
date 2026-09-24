@@ -3,9 +3,11 @@ import { useAuth } from "@/features/auth/AuthProvider";
 
 const navItems = [
   { to: "/", label: "Dashboard", end: true },
+  { to: "/lancamentos", label: "Lançamentos" },
   { to: "/contas", label: "Contas" },
   { to: "/cartoes", label: "Cartões" },
   { to: "/categorias", label: "Categorias" },
+  { to: "/recorrencias", label: "Recorrências" },
   { to: "/configuracoes", label: "Configurações" },
 ];
 
