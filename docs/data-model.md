@@ -89,3 +89,11 @@ card_id, description, purchase_date, total_amount, installment_count, installmen
 first_installment_number (1 para plano novo; >1 para "já em andamento"), first_invoice_month
 (`AAAA-MM`), interest_rate_monthly (opcional), category_id. `transaction.installment_plan_id`
 ganha FK de verdade nesta fase (a tabela já existia como coluna solta desde a Fase 3).
+
+## Fase 6
+
+Nenhuma tabela nova — o simulador de compra parcelada segura (`POST
+/api/v1/simulations/installment-purchase`) é stateless: projeta os próximos
+`parcelas + 3` meses a partir de dados já existentes (cartão, `income_source`,
+`transaction`s comprometidas por parcelamento/recorrência, gasto variável histórico,
+configurações) e não grava nada no banco.

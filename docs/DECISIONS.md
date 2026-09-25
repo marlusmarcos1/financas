@@ -131,3 +131,38 @@ A seção 6 lista `allocation_rule` na "Destinação do dinheiro", mas o plano d
 não a exige na Fase 5 — o critério de aceite é só "bolsa e 13º fora da renda base; dízimo de
 10% sobre tudo", que não depende dela. Fica para a Fase 7, quando aposentadoria/metas
 realmente consomem uma regra de destinação percentual.
+
+## Fase 6
+
+### Simulador é stateless; renda base assume só fontes MENSAIS ativas
+Diferente do dashboard (que usa `income_entry`s já lançadas do mês), o simulador projeta
+meses futuros onde ainda não existem lançamentos de receita. Por isso a "renda base mensal"
+usada na projeção é a soma de `income_source.expected_amount` das fontes com
+`recurrence=MONTHLY` e `counts_in_base_budget=true` — não depende de `income_entry`s
+existirem para os meses futuros. O dízimo projetado usa essa mesma base × percentual
+configurado, não o `tithe_ledger` real (que só existe para meses já lançados).
+
+### Precedência do veredito: Não recomendado > Atenção > Seguro, por mês, pior caso vence
+As três faixas da seção 7.4 não são mutuamente exclusivas como descritas (ex.: comprometimento
+>40% também é >30%). Aplicamos precedência explícita — primeiro checamos as condições de "Não
+recomendado" (saldo negativo ou >40%), depois "Atenção" (>30% ou saldo <10% da renda), e o
+veredito final do mês é o pior entre todos os meses projetados.
+
+### "Valor máximo de parcela seguro hoje" considera só o teto de parcelas e o saldo livre
+Calculado por mês como `min(limite% × renda base − parcelas já existentes, saldo livre sem a
+nova compra)`, tomando o mínimo entre todos os meses projetados. Não considera despesas
+variáveis futuras hipotéticas além da média histórica já embutida no saldo livre — manter o
+cálculo determinístico e auditável era mais importante aqui do que tentar prever variações.
+
+### Sugestões de alternativas são heurísticas simples, não otimização
+"Parcelar em menos vezes" sugere metade do número de parcelas atual; "esperar" aponta o
+parcelamento existente com o fim mais próximo dentro do horizonte projetado; a sugestão de
+"reserva de emergência" é textual (a Fase 7 ainda não calcula saldo de reserva). São heurísticas
+de UX, não uma busca pela alternativa ótima — evita complexidade desproporcional ao pedido da
+seção 7.4 ("sugerir alternativas").
+
+### Corrige HEALTHCHECK do frontend (bug pré-existente da Fase 1)
+O `HEALTHCHECK` do `frontend/Dockerfile` usava `wget http://localhost:80/`; dentro do
+container, `localhost` resolve primeiro para `::1` (IPv6), mas o nginx só escuta em
+`0.0.0.0:80` (IPv4), então o healthcheck falhava com "connection refused" mesmo com o site
+funcionando normalmente para requisições externas. Trocado para `http://127.0.0.1:80/`.

@@ -49,4 +49,10 @@ public final class TransactionSpecifications {
         return (root, query, cb) ->
                 cb.or(cb.isNotNull(root.get("installmentPlanId")), cb.isNotNull(root.get("recurringRuleId")));
     }
+
+    /** Lançamentos avulsos, sem vínculo com parcelamento ou recorrência (gasto variável real). */
+    public static Specification<Transaction> adHoc() {
+        return (root, query, cb) ->
+                cb.and(cb.isNull(root.get("installmentPlanId")), cb.isNull(root.get("recurringRuleId")));
+    }
 }

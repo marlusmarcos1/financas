@@ -8,6 +8,7 @@ const navItems = [
   { to: "/cartoes", label: "Cartões" },
   { to: "/categorias", label: "Categorias" },
   { to: "/parcelamentos", label: "Parcelamentos" },
+  { to: "/simulador", label: "Simulador de compra" },
   { to: "/compromissos", label: "Compromissos futuros" },
   { to: "/receitas", label: "Receitas e Extras" },
   { to: "/dizimo", label: "Dízimo" },
