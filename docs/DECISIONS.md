@@ -166,3 +166,46 @@ O `HEALTHCHECK` do `frontend/Dockerfile` usava `wget http://localhost:80/`; dent
 container, `localhost` resolve primeiro para `::1` (IPv6), mas o nginx só escuta em
 `0.0.0.0:80` (IPv4), então o healthcheck falhava com "connection refused" mesmo com o site
 funcionando normalmente para requisições externas. Trocado para `http://127.0.0.1:80/`.
+
+## Fase 7
+
+### Saldo de conta é aproximado, não um ledger de saldo corrente
+O app não mantém um saldo por lançamento (não há requisito nesse sentido nas fases
+anteriores). `AccountBalanceService` deriva o saldo sob demanda: saldo inicial + lançamentos
+`INCOME` na conta + `income_entry`s recebidos nela − lançamentos `EXPENSE`/`TRANSFER` da conta
+− faturas pagas a partir dela. Isso cobre os fluxos que o app já registra, mas não é um livro-
+-razão auditável linha a linha. Suficiente para "patrimônio total" e "reserva atual" (seção
+7.6/7.7); se um ledger de verdade for necessário depois, revisitar aqui.
+
+### Reserva de emergência: gastos "essenciais" = todas as despesas (sem marcação própria)
+A seção 7.7 pede a média de gastos "fixos + variáveis essenciais" dos últimos 6 meses.
+Categorias não têm uma flag de "essencial" — só `nature` (`FIXED`/`VARIABLE`). Usamos a média
+de TODAS as despesas dos últimos 6 meses como aproximação, documentado no próprio
+`EmergencyReserveService`. Adicionar uma flag "essencial" em `category` é uma opção futura se
+o usuário achar a média superestimada (por incluir gastos supérfluos).
+
+### Preço médio ponderado: venda não altera o preço médio; ganho realizado é derivado, não guardado
+Documentando a escolha pedida na seção 6: cada compra recalcula
+`preço médio = custo total acumulado / quantidade total`; vendas reduzem a quantidade mas
+mantêm o preço médio (o ganho/perda da venda é `quantidade vendida × (preço de venda − preço
+médio)`, calculado on-the-fly em `PositionCalculator`, não persistido). Dividendo/JCP/juros só
+somam a "renda total" do ativo, sem afetar posição ou preço médio.
+
+### Projeção de aposentadoria: taxa real via `(1+nominal)/(1+inflação)−1`, não deflação do total
+A seção 7.6 dá a fórmula da taxa real explicitamente. Em vez de simplesmente deflacionar o
+saldo nominal final por `(1+inflação)^anos`, rodamos a MESMA simulação mês a mês usando essa
+taxa real no lugar da nominal — é a leitura mais literal da fórmula dada e evita presumir uma
+correção só no valor final.
+
+### 3 cenários de aposentadoria são sempre 6%/8%/10%, independente do `expected_return_nominal_annual` do plano
+A seção 7.6 pede "cenários prontos (pessimista 6%, base 8%, otimista 10%)" como algo fixo,
+distinto do campo `expected_return_nominal_annual` armazenado no plano (que registra a
+expectativa do próprio usuário, editável, mas não usado para gerar um 4º cenário — evita
+poluir a comparação lado a lado que a spec pede).
+
+### Meta "casa" + ativo de renda variável: alerta é heurístico, não bloqueio
+Seguindo a seção 7.7 ("exibir aviso"), o alerta aparece quando existe algum
+`investment_asset` não arquivado com `purpose=HOUSE` em classe de renda variável (FII/ação/
+ETF/cripto) e a meta tem `type=HOUSE` com `target_date` a menos de 3 anos. Não impede o
+cadastro nem sugere venda automaticamente — é só um aviso textual, a decisão fica com o
+usuário.

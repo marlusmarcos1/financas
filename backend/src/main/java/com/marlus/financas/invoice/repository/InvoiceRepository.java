@@ -13,4 +13,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
     Optional<Invoice> findByIdAndUserId(UUID id, UUID userId);
 
     List<Invoice> findAllByUserIdAndCardIdOrderByReferenceMonthAsc(UUID userId, UUID cardId);
+
+    List<Invoice> findAllByUserIdAndPaidFromAccountId(UUID userId, UUID paidFromAccountId);
 }

@@ -8,9 +8,12 @@ import { CardsPage } from "@/features/cards/CardsPage";
 import { CategoriesPage } from "@/features/categories/CategoriesPage";
 import { CommitmentsPage } from "@/features/commitments/CommitmentsPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
+import { GoalsPage } from "@/features/goals/GoalsPage";
 import { IncomePage } from "@/features/income/IncomePage";
 import { InstallmentsPage } from "@/features/installments/InstallmentsPage";
+import { InvestmentsPage } from "@/features/investments/InvestmentsPage";
 import { RecurringPage } from "@/features/recurring/RecurringPage";
+import { RetirementPage } from "@/features/retirement/RetirementPage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
 import { SimulatorPage } from "@/features/simulation/SimulatorPage";
 import { TithePage } from "@/features/tithe/TithePage";
@@ -39,6 +42,9 @@ export function App() {
           <Route path="/receitas" element={<IncomePage />} />
           <Route path="/dizimo" element={<TithePage />} />
           <Route path="/recorrencias" element={<RecurringPage />} />
+          <Route path="/investimentos" element={<InvestmentsPage />} />
+          <Route path="/aposentadoria" element={<RetirementPage />} />
+          <Route path="/metas" element={<GoalsPage />} />
           <Route path="/configuracoes" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

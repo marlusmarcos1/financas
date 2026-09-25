@@ -13,6 +13,9 @@ const navItems = [
   { to: "/receitas", label: "Receitas e Extras" },
   { to: "/dizimo", label: "Dízimo" },
   { to: "/recorrencias", label: "Recorrências" },
+  { to: "/investimentos", label: "Investimentos" },
+  { to: "/aposentadoria", label: "Aposentadoria" },
+  { to: "/metas", label: "Metas" },
   { to: "/configuracoes", label: "Configurações" },
 ];
 

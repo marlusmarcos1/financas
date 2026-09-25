@@ -97,3 +97,30 @@ Nenhuma tabela nova — o simulador de compra parcelada segura (`POST
 `parcelas + 3` meses a partir de dados já existentes (cartão, `income_source`,
 `transaction`s comprometidas por parcelamento/recorrência, gasto variável histórico,
 configurações) e não grava nada no banco.
+
+## Fase 7
+
+### `investment_asset` / `investment_transaction`
+Ativo (ticker, classe, subclasse, indexador, vencimento, preço atual manual, finalidade,
+arquivado) e suas operações (compra/venda/dividendo/JCP/juros/taxa). Posição e preço médio
+não são colunas persistidas — derivados sob demanda a partir do histórico de operações pelo
+método do preço médio ponderado (`PositionCalculator`).
+
+### `allocation_target`
+Alvo de alocação por `(finalidade, classe de ativo)`, único por usuário
+(`UNIQUE(user_id, purpose, asset_class)`).
+
+### `retirement_plan`
+Uma linha por usuário (`UNIQUE(user_id)`): aporte mensal, reajuste anual, data de início,
+horizonte em anos, retorno nominal/inflação esperados, saldo atual. Os 3 cenários de
+projeção (pessimista 6%/base 8%/otimista 10%) são calculados on-demand, não armazenados.
+
+### `goal` / `goal_contribution`
+Meta (nome, tipo, valor/data-alvo, conta vinculada opcional, aporte mensal planejado,
+prioridade) e seus aportes (data, valor, origem). "Quanto já tem" é a soma dos aportes, não
+um saldo de conta separado.
+
+### Sem tabela nova para patrimônio/reserva
+`GET /api/v1/net-worth` e `GET /api/v1/emergency-reserve` são somente leitura, calculados a
+partir de `account`, `transaction`, `income_entry`, `invoice` e da carteira de investimentos —
+ver DECISIONS.md sobre como o saldo de conta é aproximado sem um ledger de saldo corrente.

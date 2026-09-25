@@ -19,4 +19,6 @@ public interface IncomeEntryRepository extends JpaRepository<IncomeEntry, UUID> 
 
     List<IncomeEntry> findAllByUserIdAndReferenceMonthAndStatus(
             UUID userId, String referenceMonth, IncomeEntryStatus status);
+
+    List<IncomeEntry> findAllByUserIdAndStatus(UUID userId, IncomeEntryStatus status);
 }
