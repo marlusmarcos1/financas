@@ -1,4 +1,4 @@
-const API_BASE = "/api/v1";
+export const API_BASE = "/api/v1";
 
 export class ApiError extends Error {
   constructor(
@@ -11,7 +11,7 @@ export class ApiError extends Error {
   }
 }
 
-function readCookie(name: string): string | null {
+export function readCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
   return match ? decodeURIComponent(match[1]) : null;
 }

@@ -11,4 +11,6 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     List<Account> findAllByUserIdOrderByArchivedAscNameAsc(UUID userId);
 
     Optional<Account> findByIdAndUserId(UUID id, UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

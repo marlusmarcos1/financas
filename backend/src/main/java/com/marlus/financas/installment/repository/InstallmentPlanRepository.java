@@ -11,4 +11,6 @@ public interface InstallmentPlanRepository extends JpaRepository<InstallmentPlan
     List<InstallmentPlan> findAllByUserIdOrderByPurchaseDateDesc(UUID userId);
 
     Optional<InstallmentPlan> findByIdAndUserId(UUID id, UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

@@ -124,3 +124,20 @@ um saldo de conta separado.
 `GET /api/v1/net-worth` e `GET /api/v1/emergency-reserve` são somente leitura, calculados a
 partir de `account`, `transaction`, `income_entry`, `invoice` e da carteira de investimentos —
 ver DECISIONS.md sobre como o saldo de conta é aproximado sem um ledger de saldo corrente.
+
+## Fase 8
+
+### `import_job`
+Registro de auditoria de cada validação/aplicação de importação: `filename`, `mode`
+(`MERGE`/`REPLACE`), `status` (`DRY_RUN`/`APPLIED`/`FAILED`), `summary_json` (o mesmo corpo
+JSON devolvido pela API, com contagens por arquivo e lista de erros). Não guarda o arquivo
+enviado, só o resultado do processamento.
+
+### Exportação/Importação não têm tabelas próprias por entidade
+Cada uma das outras 17 entidades exportáveis (contas, cartões, categorias, orçamentos,
+receitas, lançamentos de receita, recorrências, parcelamentos, faturas, lançamentos,
+dízimo, ativos e movimentações de investimento, alvos de alocação, plano de aposentadoria,
+metas, aportes de meta, configurações) já tinha sua tabela própria das fases 2-7; a Fase 8
+só adiciona um `EntityCsvHandler` por entidade (mapeia colunas do CSV ↔ campos da entidade)
+e o `import_job` acima — ver DECISIONS.md para as regras de upsert, imutabilidade e
+validação usadas nesses handlers.

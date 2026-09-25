@@ -15,4 +15,6 @@ public interface InvestmentTransactionRepository extends JpaRepository<Investmen
     Optional<InvestmentTransaction> findByIdAndUserId(UUID id, UUID userId);
 
     boolean existsByAssetIdAndUserId(UUID assetId, UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

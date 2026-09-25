@@ -11,4 +11,8 @@ public interface AppSettingRepository extends JpaRepository<AppSetting, UUID> {
     List<AppSetting> findAllByUserId(UUID userId);
 
     Optional<AppSetting> findByUserIdAndKey(UUID userId, String key);
+
+    Optional<AppSetting> findByIdAndUserId(UUID id, UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

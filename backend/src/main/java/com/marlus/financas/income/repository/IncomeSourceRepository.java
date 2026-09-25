@@ -11,4 +11,6 @@ public interface IncomeSourceRepository extends JpaRepository<IncomeSource, UUID
     List<IncomeSource> findAllByUserIdOrderByNameAsc(UUID userId);
 
     Optional<IncomeSource> findByIdAndUserId(UUID id, UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

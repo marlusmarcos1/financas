@@ -17,4 +17,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
     List<Transaction> findAllByUserIdAndInstallmentPlanId(UUID userId, UUID installmentPlanId);
 
     boolean existsByRecurringRuleIdAndDate(UUID recurringRuleId, LocalDate date);
+
+    List<Transaction> findAllByUserId(UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

@@ -11,4 +11,6 @@ public interface CreditCardRepository extends JpaRepository<CreditCard, UUID> {
     List<CreditCard> findAllByUserIdOrderByArchivedAscNameAsc(UUID userId);
 
     Optional<CreditCard> findByIdAndUserId(UUID id, UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

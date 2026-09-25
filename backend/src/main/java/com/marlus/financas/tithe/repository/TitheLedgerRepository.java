@@ -15,4 +15,6 @@ public interface TitheLedgerRepository extends JpaRepository<TitheLedger, UUID> 
     List<TitheLedger> findAllByUserIdOrderByReferenceMonthDesc(UUID userId);
 
     List<TitheLedger> findAllByUserIdAndReferenceMonthStartingWith(UUID userId, String yearPrefix);
+
+    void deleteAllByUserId(UUID userId);
 }

@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface RetirementPlanRepository extends JpaRepository<RetirementPlan, UUID> {
 
     Optional<RetirementPlan> findByUserId(UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

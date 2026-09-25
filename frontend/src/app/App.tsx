@@ -8,6 +8,7 @@ import { CardsPage } from "@/features/cards/CardsPage";
 import { CategoriesPage } from "@/features/categories/CategoriesPage";
 import { CommitmentsPage } from "@/features/commitments/CommitmentsPage";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
+import { DataIoPage } from "@/features/dataio/DataIoPage";
 import { GoalsPage } from "@/features/goals/GoalsPage";
 import { IncomePage } from "@/features/income/IncomePage";
 import { InstallmentsPage } from "@/features/installments/InstallmentsPage";
@@ -46,6 +47,7 @@ export function App() {
           <Route path="/aposentadoria" element={<RetirementPage />} />
           <Route path="/metas" element={<GoalsPage />} />
           <Route path="/configuracoes" element={<SettingsPage />} />
+          <Route path="/dados" element={<DataIoPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

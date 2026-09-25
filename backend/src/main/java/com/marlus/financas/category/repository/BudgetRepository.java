@@ -10,7 +10,11 @@ public interface BudgetRepository extends JpaRepository<Budget, UUID> {
 
     List<Budget> findAllByUserIdAndCategoryIdOrderByMonthAsc(UUID userId, UUID categoryId);
 
+    List<Budget> findAllByUserIdOrderByCategoryIdAsc(UUID userId);
+
     Optional<Budget> findByIdAndUserId(UUID id, UUID userId);
 
     boolean existsByCategoryIdAndUserId(UUID categoryId, UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

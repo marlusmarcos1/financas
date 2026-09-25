@@ -11,4 +11,6 @@ public interface InvestmentAssetRepository extends JpaRepository<InvestmentAsset
     List<InvestmentAsset> findAllByUserIdOrderByTickerAsc(UUID userId);
 
     Optional<InvestmentAsset> findByIdAndUserId(UUID id, UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

@@ -11,4 +11,6 @@ public interface GoalRepository extends JpaRepository<Goal, UUID> {
     List<Goal> findAllByUserIdOrderByPriorityAscNameAsc(UUID userId);
 
     Optional<Goal> findByIdAndUserId(UUID id, UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

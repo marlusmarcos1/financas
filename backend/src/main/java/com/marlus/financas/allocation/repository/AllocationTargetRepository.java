@@ -16,4 +16,8 @@ public interface AllocationTargetRepository extends JpaRepository<AllocationTarg
             UUID userId, InvestmentPurpose purpose, InvestmentAssetClass assetClass);
 
     Optional<AllocationTarget> findByIdAndUserId(UUID id, UUID userId);
+
+    List<AllocationTarget> findAllByUserId(UUID userId);
+
+    void deleteAllByUserId(UUID userId);
 }

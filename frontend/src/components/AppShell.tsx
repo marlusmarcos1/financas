@@ -17,6 +17,7 @@ const navItems = [
   { to: "/aposentadoria", label: "Aposentadoria" },
   { to: "/metas", label: "Metas" },
   { to: "/configuracoes", label: "Configurações" },
+  { to: "/dados", label: "Exportar / Importar" },
 ];
 
 export function AppShell() {

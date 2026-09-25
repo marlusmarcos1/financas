@@ -51,6 +51,20 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
+    @ExceptionHandler(com.marlus.financas.dataio.service.ImportFileException.class)
+    public ProblemDetail handleImportFile(com.marlus.financas.dataio.service.ImportFileException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle("Arquivo de importação inválido");
+        return problem;
+    }
+
+    @ExceptionHandler(com.marlus.financas.dataio.service.ImportConfirmationException.class)
+    public ProblemDetail handleImportConfirmation(com.marlus.financas.dataio.service.ImportConfirmationException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle("Confirmação necessária");
+        return problem;
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(

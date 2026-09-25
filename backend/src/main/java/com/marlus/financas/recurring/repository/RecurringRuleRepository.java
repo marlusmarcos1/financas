@@ -13,4 +13,6 @@ public interface RecurringRuleRepository extends JpaRepository<RecurringRule, UU
     Optional<RecurringRule> findByIdAndUserId(UUID id, UUID userId);
 
     List<RecurringRule> findAllByActiveTrue();
+
+    void deleteAllByUserId(UUID userId);
 }

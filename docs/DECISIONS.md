@@ -209,3 +209,62 @@ Seguindo a seção 7.7 ("exibir aviso"), o alerta aparece quando existe algum
 ETF/cripto) e a meta tem `type=HOUSE` com `target_date` a menos de 3 anos. Não impede o
 cadastro nem sugere venda automaticamente — é só um aviso textual, a decisão fica com o
 usuário.
+
+## Fase 8
+
+### Upsert por UUID: importar não gera IDs novos, usa o UUID da própria linha do CSV
+A seção 9 pede "MERGE (atualiza por id)". Cada `EntityCsvHandler.importRow` faz
+`findByIdAndUserId` — se existe, atualiza; se não existe mas o UUID já está em uso por
+**outro** usuário (`existsById`), a linha vira erro ("id já pertence a outro registro") em
+vez de ser silenciosamente ignorada ou sobrescrita, porque o `id` é chave primária global da
+tabela, não escopada por usuário. Isso significa que reimportar o export de um usuário
+dentro de outro usuário (ex.: copiar dados entre contas) nunca funciona por MERGE — é
+esperado: o cenário coberto é "exportei meus dados, preciso restaurá-los" (mesmo usuário,
+banco vazio ou não), não "clonar dados para outra conta".
+
+### Entidades sem setters (parcelamento, movimentação de investimento, aporte de meta) são "imutáveis" na importação
+`InstallmentPlan`, `InvestmentTransaction` e `GoalContribution` não expõem setters (decisão
+das fases 4/7 — criá-los dispara efeitos colaterais como gerar faturas/lançamentos). Na
+importação, se a linha já existe e os valores batem exatamente com o que está no banco, conta
+como "atualizado" (no-op); se algum campo diverge, vira erro pedindo para excluir e recriar em
+vez de tentar uma edição parcial que quebraria a consistência dessas entidades. `Budget.
+categoryId`/`month`, `IncomeEntry.sourceId`, `AllocationTarget.(purpose,assetClass)`,
+`AppSetting.key` e os campos imutáveis de `Invoice`/`TitheLedger` (cartão/mês/fechamento/
+vencimento e mês de referência) seguem a mesma regra por serem identidade/chave lógica, não
+apenas um valor editável.
+
+### Fatura e dízimo: valor pago do CSV é absoluto, mas as entidades só somam delta
+`Invoice.registerPayment` e `TitheLedger.registerPayment` foram desenhados nas fases 3/5 para
+"registrar um pagamento adicional" (soma ao já pago), não para "definir o valor pago". Como o
+CSV traz o valor pago **absoluto** (mais simples de auditar/editar manualmente), o handler
+calcula `delta = valorDoCsv − valorAtualNoBanco` e chama `registerPayment(delta, ...)` — dá o
+mesmo resultado sem duplicar as entidades com um segundo método `setPaidAmount`.
+
+### Validação de import cobre tipo/formato, não integridade referencial entre entidades
+`CsvFieldParser` garante que cada campo tem o tipo certo (UUID, decimal, data ISO, enum,
+booleano) e reporta erro de linha em pt-BR quando não tem. Não verificamos se um
+`category_id`/`account_id`/etc. referenciado por uma linha realmente existe — isso fica a
+cargo da constraint de FK do Postgres no momento do `apply` (dentro da transação única, que
+faz rollback de tudo se qualquer coisa falhar). Verificar FK entre 18 entidades no dry-run
+exigiria injetar todos os repositórios em todos os handlers só para essa checagem; como o
+caso de uso real é "reimportar meu próprio export" (FKs sempre válidas, já que vieram do
+próprio banco), não vale a complexidade agora — fica registrado aqui como limite conhecido.
+
+### `manifest.json` com checksum SHA-256 por arquivo; importação rejeita adulteração ou versão futura
+Cada CSV dentro do zip tem seu SHA-256 gravado no manifesto; na importação, qualquer
+divergência (arquivo editado à mão de forma inconsistente, corrupção de transferência) aborta
+a importação inteira antes de tocar no banco. `schema_version` (hoje `"1"`) permite rejeitar
+com uma mensagem clara um arquivo exportado por uma versão futura do app; versões antigas
+seriam aceitas via conversores quando o formato mudar de forma incompatível — ainda não
+necessário, só existe uma versão.
+
+### REPLACE ("Substituir tudo") exige o texto literal "SUBSTITUIR" e roda em duas passadas dentro da mesma transação
+Primeiro valida tudo com `apply=false` (nenhuma escrita); só se zero erros é que apaga os
+dados do usuário (ordem inversa de dependência, para respeitar FKs) e reimporta com
+`apply=true` — tudo dentro do mesmo `@Transactional`, então qualquer falha inesperada na
+segunda passada desfaz também o apagamento. Sem a palavra de confirmação exata, a requisição
+é rejeitada antes de ler o zip.
+
+### Sem `allocation_rules.csv`
+Não existe entidade `allocation_rule` no banco (decisão da Fase 5: alocação-alvo já cobre a
+seção 7.7 sem uma tabela de regras separada) — não há o que exportar/importar com esse nome.
