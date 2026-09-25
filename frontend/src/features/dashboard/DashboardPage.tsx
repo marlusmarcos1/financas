@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { inputClass } from "@/components/FormField";
-import { fetchNetWorth } from "@/features/networth/api";
-import { fetchDashboard } from "./api";
+import { fetchNetWorth, fetchNetWorthHistory } from "@/features/networth/api";
+import { fetchAlerts, fetchDashboard, fetchDashboardExtras } from "./api";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -16,6 +17,9 @@ export function DashboardPage() {
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
   const dashboardQuery = useQuery({ queryKey: ["dashboard", month], queryFn: () => fetchDashboard(month) });
   const netWorthQuery = useQuery({ queryKey: ["net-worth"], queryFn: fetchNetWorth });
+  const netWorthHistoryQuery = useQuery({ queryKey: ["net-worth-history"], queryFn: () => fetchNetWorthHistory(6) });
+  const alertsQuery = useQuery({ queryKey: ["alerts"], queryFn: fetchAlerts });
+  const extrasQuery = useQuery({ queryKey: ["dashboard-extras", month], queryFn: () => fetchDashboardExtras(month) });
 
   return (
     <div>
@@ -28,6 +32,23 @@ export function DashboardPage() {
           onChange={(e) => setMonth(e.target.value)}
         />
       </div>
+
+      {alertsQuery.data && alertsQuery.data.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {alertsQuery.data.map((alert, index) => (
+            <div
+              key={`${alert.severity}-${index}`}
+              className={`rounded-md px-4 py-2 text-sm ${
+                alert.severity === "DANGER"
+                  ? "bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200"
+                  : "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200"
+              }`}
+            >
+              {alert.message}
+            </div>
+          ))}
+        </div>
+      )}
 
       {dashboardQuery.isLoading && <p className="text-sm text-slate-500">Carregando...</p>}
 
@@ -96,6 +117,76 @@ export function DashboardPage() {
               ))}
             </div>
           </div>
+
+          {extrasQuery.data && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+                <h2 className="mb-2 text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">
+                  Pague-se primeiro
+                </h2>
+                <ul className="space-y-2 text-sm">
+                  {extrasQuery.data.payYourselfFirst.map((item) => (
+                    <li key={item.label} className="flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <span
+                          className={`inline-block h-2 w-2 rounded-full ${item.done ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"}`}
+                        />
+                        {item.label}
+                      </span>
+                      <span className="text-slate-600 dark:text-slate-300">
+                        {currencyFormatter.format(item.targetAmount)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {extrasQuery.data.scholarships.length > 0 && (
+                <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+                  <h2 className="mb-2 text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">
+                    Contagem regressiva
+                  </h2>
+                  <ul className="space-y-2 text-sm">
+                    {extrasQuery.data.scholarships.map((s) => (
+                      <li key={s.sourceId} className="flex items-center justify-between">
+                        <span>{s.name}</span>
+                        <span className="text-slate-600 dark:text-slate-300">
+                          {s.remainingMonths} mês(es) restante(s) (até {s.endsOn})
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                    A sobra do mês acima já considera só a renda base — é o cenário "e se a bolsa
+                    acabasse agora".
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {netWorthHistoryQuery.data && netWorthHistoryQuery.data.length > 1 && (
+            <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+              <h2 className="mb-2 text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">
+                Evolução patrimonial (6 meses)
+              </h2>
+              <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+                Investimentos aqui somam o capital aportado (custo), não a cotação histórica — o
+                app não tem cotação automática.
+              </p>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={netWorthHistoryQuery.data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" fontSize={12} />
+                    <YAxis fontSize={12} tickFormatter={(v) => currencyFormatter.format(Number(v))} width={90} />
+                    <Tooltip formatter={(value) => currencyFormatter.format(Number(value))} />
+                    <Line type="monotone" dataKey="total" name="Patrimônio" stroke="#0f172a" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

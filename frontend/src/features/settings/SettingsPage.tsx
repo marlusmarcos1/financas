@@ -6,7 +6,7 @@ import { z } from "zod";
 import { FormField, inputClass } from "@/components/FormField";
 import { useToast } from "@/components/ToastProvider";
 import { ApiError } from "@/lib/api";
-import { changePassword, fetchSettings, updateSettings } from "./api";
+import { changePassword, fetchSettings, seedDemoData, updateSettings } from "./api";
 
 const settingsSchema = z.object({
   tithePercent: z.coerce.number().min(0).max(100),
@@ -41,7 +41,48 @@ export function SettingsPage() {
       </div>
       <SettingsForm />
       <PasswordForm />
+      <SeedDemoSection />
     </div>
+  );
+}
+
+function SeedDemoSection() {
+  const toast = useToast();
+  const mutation = useMutation({
+    mutationFn: seedDemoData,
+    onSuccess: (result) => {
+      if (result.applied) {
+        toast.showSuccess(result.message);
+      } else {
+        toast.showError(result.message);
+      }
+    },
+    onError: (error) => toast.showError(error instanceof ApiError ? error.message : "Erro ao carregar dados de exemplo."),
+  });
+
+  return (
+    <section className="rounded-xl border border-slate-200 p-6 dark:border-slate-800">
+      <h2 className="mb-2 text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">
+        Dados de exemplo
+      </h2>
+      <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
+        Carrega cartões, receitas, parcelamentos e metas de exemplo para você explorar o app
+        (idêntico ao comando <code>make seed-demo</code>). Só funciona uma vez por usuário — tudo
+        fica editável ou removível pela interface depois.
+      </p>
+      <button
+        type="button"
+        onClick={() => {
+          if (window.confirm("Carregar dados de exemplo agora?")) {
+            mutation.mutate();
+          }
+        }}
+        disabled={mutation.isPending}
+        className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-60 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+      >
+        {mutation.isPending ? "Carregando..." : "Carregar dados de exemplo"}
+      </button>
+    </section>
   );
 }
 

@@ -4,6 +4,7 @@ import { RequireAuth } from "@/components/RequireAuth";
 import { AccountsPage } from "@/features/accounts/AccountsPage";
 import { AuthProvider } from "@/features/auth/AuthProvider";
 import { LoginPage } from "@/features/auth/LoginPage";
+import { CalendarPage } from "@/features/calendar/CalendarPage";
 import { CardsPage } from "@/features/cards/CardsPage";
 import { CategoriesPage } from "@/features/categories/CategoriesPage";
 import { CommitmentsPage } from "@/features/commitments/CommitmentsPage";
@@ -40,6 +41,7 @@ export function App() {
           <Route path="/parcelamentos" element={<InstallmentsPage />} />
           <Route path="/simulador" element={<SimulatorPage />} />
           <Route path="/compromissos" element={<CommitmentsPage />} />
+          <Route path="/calendario" element={<CalendarPage />} />
           <Route path="/receitas" element={<IncomePage />} />
           <Route path="/dizimo" element={<TithePage />} />
           <Route path="/recorrencias" element={<RecurringPage />} />

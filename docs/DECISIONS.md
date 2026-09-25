@@ -268,3 +268,41 @@ segunda passada desfaz também o apagamento. Sem a palavra de confirmação exat
 ### Sem `allocation_rules.csv`
 Não existe entidade `allocation_rule` no banco (decisão da Fase 5: alocação-alvo já cobre a
 seção 7.7 sem uma tabela de regras separada) — não há o que exportar/importar com esse nome.
+
+## Fase 9
+
+### "E se a bolsa acabar agora?" não precisou de cálculo próprio
+A seção 11 pede essa simulação como "orçamento só com a renda base". Como `DashboardService`
+(Fase 5) já separa `baseIncomeReceived` de `extrasReceived` — e a bolsa, com
+`counts_in_base_budget=false`, sempre cai em "extras" — a `sobra` do mês já é exatamente esse
+cenário. `DashboardExtrasService` só adiciona a contagem regressiva (meses restantes por fonte
+`TEMPORARY`) e um texto explicando isso na tela; nenhuma rota nova de simulação foi criada.
+
+### Checklist "pague-se primeiro": item de aposentadoria sempre aparece como pendente
+Não existe hoje um registro de "este mês eu já fiz o aporte de aposentadoria" — `retirement_plan`
+guarda só o valor mensal planejado, não um histórico de transferências. Marcar esse item como
+"feito" exigiria criar esse rastreamento só para isso; por ora o checklist sempre mostra o valor-
+-alvo com `done=false`, servindo de lembrete, não de confirmação automática. Dízimo (via
+`tithe_ledger.paid_amount` vs `due_amount`) e reserva (via meta de `EmergencyReserveService`)
+já têm dado suficiente para marcar "feito" de verdade.
+
+### Alertas: limiares fixos (3 dias para fatura, 2 meses para bolsa terminando)
+A seção 8 dá exemplos ("fatura fecha em 2 dias") sem fixar o número. Escolhidos 3 dias para
+fechamento/vencimento de fatura e 2 meses para o fim de uma receita `TEMPORARY` (bolsa) — dá
+tempo de reação sem poluir o dashboard com avisos cedo demais. Não são configuráveis por
+enquanto; se o usuário achar cedo/tarde demais, é um ajuste pontual nessas constantes.
+
+### Evolução patrimonial: contas exatas, investimentos por custo (não por cotação)
+Documentado também no Javadoc de `NetWorthHistoryService`: o saldo de contas em cada mês passado
+é reconstruído com precisão a partir do histórico de lançamentos (mesma lógica de
+`AccountBalanceService`, com um corte de data). Investimentos usam o capital aportado até a
+data (via `PositionCalculator` sobre as transações filtradas), não o valor de mercado histórico
+— o app não tem cotação automática (seção 13), então não haveria como saber o preço de um ativo
+em um mês passado. Registrado também em BACKLOG.md como possível melhoria futura.
+
+### `seed-demo`: endpoint autenticado idempotente, não um profile/perfil Spring separado
+Cogitamos um `ApplicationRunner` ativado por variável de ambiente/profile, mas isso exigiria
+reiniciar o container para (des)ativar. Em vez disso, `POST /api/v1/seed-demo` roda para o
+usuário logado, verifica um marcador (`app_setting` com chave `seed_demo_applied`) e não faz
+nada se já rodou — mais simples, funciona com o container já no ar, e dá pra chamar tanto de
+`make seed-demo` (via curl com login) quanto de um botão em Configurações.

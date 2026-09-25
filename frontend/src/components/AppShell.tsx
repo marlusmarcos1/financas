@@ -10,6 +10,7 @@ const navItems = [
   { to: "/parcelamentos", label: "Parcelamentos" },
   { to: "/simulador", label: "Simulador de compra" },
   { to: "/compromissos", label: "Compromissos futuros" },
+  { to: "/calendario", label: "Calendário" },
   { to: "/receitas", label: "Receitas e Extras" },
   { to: "/dizimo", label: "Dízimo" },
   { to: "/recorrencias", label: "Recorrências" },

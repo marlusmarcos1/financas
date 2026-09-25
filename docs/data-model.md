@@ -141,3 +141,11 @@ metas, aportes de meta, configurações) já tinha sua tabela própria das fases
 só adiciona um `EntityCsvHandler` por entidade (mapeia colunas do CSV ↔ campos da entidade)
 e o `import_job` acima — ver DECISIONS.md para as regras de upsert, imutabilidade e
 validação usadas nesses handlers.
+
+## Fase 9
+
+### Nenhuma tabela nova
+Alertas, calendário de vencimentos, checklist "pague-se primeiro", contagem regressiva de
+receitas temporárias, evolução patrimonial e `seed-demo` são todos derivados sob demanda a
+partir de tabelas já existentes (nenhuma migration nova) — só uma nova chave de
+`app_setting` (`seed_demo_applied`) usada como marcador de idempotência.

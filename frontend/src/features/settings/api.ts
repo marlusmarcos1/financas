@@ -12,3 +12,7 @@ export function updateSettings(input: SettingsInput): Promise<Settings> {
 export function changePassword(input: PasswordChangeInput): Promise<void> {
   return api.put<void>("/auth/password", input);
 }
+
+export function seedDemoData(): Promise<{ applied: boolean; message: string }> {
+  return api.post("/seed-demo");
+}

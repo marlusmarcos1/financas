@@ -38,8 +38,18 @@ public class AccountBalanceService {
     }
 
     public BigDecimal currentBalance(Account account) {
+        return balanceAsOf(account, null);
+    }
+
+    /**
+     * Saldo aproximado até uma data (inclusive) — usado na evolução patrimonial (seção 11) para
+     * reconstruir o saldo de meses passados a partir do histórico de lançamentos. {@code asOf
+     * null} = sem limite de data (saldo atual).
+     */
+    public BigDecimal balanceAsOf(Account account, java.time.LocalDate asOf) {
         Specification<Transaction> spec = Specification.where(TransactionSpecifications.belongsToUser(account.getUserId()))
-                .and(TransactionSpecifications.accountId(account.getId()));
+                .and(TransactionSpecifications.accountId(account.getId()))
+                .and(TransactionSpecifications.dateTo(asOf));
         java.util.List<Transaction> transactions = transactionRepository.findAll(spec);
 
         BigDecimal income = transactions.stream()
@@ -55,12 +65,14 @@ public class AccountBalanceService {
                 .findAllByUserIdAndStatus(account.getUserId(), IncomeEntryStatus.RECEIVED)
                 .stream()
                 .filter(entry -> account.getId().equals(entry.getAccountId()))
+                .filter(entry -> asOf == null || !entry.getReceivedOn().isAfter(asOf))
                 .map(entry -> entry.getAmount())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal invoicePayments = invoiceRepository
                 .findAllByUserIdAndPaidFromAccountId(account.getUserId(), account.getId())
                 .stream()
+                .filter(invoice -> asOf == null || invoice.getPaidOn() == null || !invoice.getPaidOn().isAfter(asOf))
                 .map(invoice -> invoice.getPaidAmount())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 

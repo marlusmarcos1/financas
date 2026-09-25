@@ -19,3 +19,10 @@ export interface EmergencyReserve {
   targetAmount: number;
   monthsOfCoverage: number;
 }
+
+export interface NetWorthPoint {
+  month: string;
+  accountsTotal: number;
+  investedCapital: number;
+  total: number;
+}
